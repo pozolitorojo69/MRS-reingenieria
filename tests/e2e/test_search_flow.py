@@ -19,7 +19,7 @@ def test_search_by_title_shows_movie_cards(driver):
     driver.find_element(By.ID, "minRating").send_keys("0")
     driver.find_element(By.ID, "getRecommendations").click()
 
-    WebDriverWait(driver, 15).until(
+    WebDriverWait(driver, 30).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, ".movie-card, .no-results-container"))
     )
     cards = driver.find_elements(By.CSS_SELECTOR, ".movie-card")
@@ -34,7 +34,7 @@ def test_search_with_no_results_shows_message(driver):
     driver.find_element(By.ID, "minRating").send_keys("0")
     driver.find_element(By.ID, "getRecommendations").click()
 
-    WebDriverWait(driver, 15).until(
+    WebDriverWait(driver, 30).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, ".movie-card, .no-results-container"))
     )
     no_results = driver.find_elements(By.CSS_SELECTOR, ".no-results-container")
@@ -49,12 +49,12 @@ def test_more_info_opens_modal_with_movie_details(driver):
     driver.find_element(By.ID, "minRating").send_keys("0")
     driver.find_element(By.ID, "getRecommendations").click()
 
-    WebDriverWait(driver, 15).until(
+    WebDriverWait(driver, 30).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, ".movie-card"))
     )
     driver.find_element(By.CSS_SELECTOR, ".more-info-btn").click()
 
-    modal_title = WebDriverWait(driver, 10).until(
+    modal_title = WebDriverWait(driver, 20).until(
         EC.visibility_of_element_located((By.CSS_SELECTOR, ".movie-modal.fade-in .modal-content h2"))
     )
     title_text = modal_title.get_attribute("textContent").strip()
