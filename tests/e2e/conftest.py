@@ -12,13 +12,19 @@ BASE_URL = "http://localhost:5000"
 def driver():
     options = Options()
     options.add_argument("--window-size=1280,800")
-    # Para correr en modo visual (necesario para tu evidencia local),
-    # deja estas líneas comentadas. Para CI, se activan (ver Fase 5).
-    # options.add_argument("--headless=new")
+
+    chrome_bin = os.environ.get("CHROME_BIN")
+    if chrome_bin:
+        options.binary_location = chrome_bin
+
+    if os.environ.get("CI"):
+        options.add_argument("--headless=new")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
 
     driver_path = ChromeDriverManager().install()
-    if not driver_path.endswith("chromedriver.exe"):
-        driver_path = os.path.join(os.path.dirname(driver_path), "chromedriver.exe")
+    if not driver_path.endswith("chromedriver.exe") and not driver_path.endswith("chromedriver"):
+        driver_path = os.path.join(os.path.dirname(driver_path), "chromedriver.exe" if os.name == "nt" else "chromedriver")
     service = Service(driver_path)
 
     drv = webdriver.Chrome(service=service, options=options)

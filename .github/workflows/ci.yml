@@ -28,6 +28,7 @@ jobs:
     env:
       TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
       FLASK_ENV: testing
+      CI: "true"
     steps:
       - uses: actions/checkout@v4
 
@@ -36,6 +37,7 @@ jobs:
           python-version: "3.12"
 
       - name: Instalar Google Chrome
+        id: setup-chrome
         uses: browser-actions/setup-chrome@v1
 
       - name: Instalar dependencias
@@ -54,3 +56,26 @@ jobs:
 
       - name: Correr pruebas Selenium (headless)
         run: python -m pytest tests/e2e/ -v
+        env:
+          CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
+
+  docker-build:
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construir imagen Docker
+        run: docker build -t mrs-app .
+
+  security-scan:
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Escaneo de dependencias vulnerables
+        run: |
+          pip install pip-audit
+          pip-audit -r requirements.txt || true
