@@ -21,10 +21,6 @@ def driver():
         options.add_argument("--headless=new")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
-        # En CI dejamos que el Selenium Manager integrado (Selenium 4+)
-        # detecte y descargue el chromedriver que coincide exactamente
-        # con el Chrome que se instaló en el workflow, en vez de
-        # webdriver-manager, que no encuentra bien esta ruta no estándar.
         drv = webdriver.Chrome(options=options)
     else:
         from webdriver_manager.chrome import ChromeDriverManager
