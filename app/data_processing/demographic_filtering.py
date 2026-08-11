@@ -1,7 +1,10 @@
+from functools import lru_cache
+
 import pandas as pd
 import numpy as np
 from config.config import Config
 
+@lru_cache(maxsize=1)
 def load_and_process_data():
     df1 = pd.read_csv(Config.CREDITS_PATH, low_memory=False)
     df2 = pd.read_csv(Config.MOVIES_METADATA_PATH, low_memory=False)

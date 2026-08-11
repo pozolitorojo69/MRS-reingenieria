@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
             n: numRecommendations
         });
 
-        fetchRecommendations(`/recommendations?${params}`);
+        fetchRecommendations(`/api/recommendations?${params}`);
     });
 
     async function fetchRecommendations(url) {
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchMovieDetails(movieId) {
         try {
-            const response = await fetch(`/movie/${movieId}`);
+            const response = await fetch(`/api/movie/${movieId}`);
             if (!response.ok) throw new Error('Network response was not ok');
             const movie = await response.json();
             showMovieModal(movie);

@@ -1,145 +1,29 @@
-# 🎬 Movie Recommendation System
+# MRS - Sistema de Recomendación de Películas
 
-Welcome to the **Movie Recommendation System**! 🍿 This powerful application leverages content-based filtering to recommend movies based on your preferred genres and movie names. Built with Flask, it offers a smooth web interface and a RESTful API for easy interaction with personalized movie recommendations.
+Proyecto de reingeniería sobre el repo original de raviraj-p (https://github.com/raviraj-p/MRS). Es una app en Flask que recomienda películas según género, título o rating, usando datos locales (SQLite/CSV) y la API de TMDB.
 
-## 🚀 Quick Start
+## Cómo estaba antes
 
-Follow these simple steps to set up and run the application:
+El código original funcionaba, pero tenía varios problemas típicos de un proyecto que creció sin mucho orden:
 
-### 1. Clone the Repository
+- Todas las rutas (la página principal, los endpoints de recomendaciones y las llamadas a TMDB) estaban metidas en un solo archivo, `app/routes/recommendations.py`, con un único Blueprint. No había separación entre "esto sirve HTML" y "esto sirve JSON".
+- La API key de TMDB estaba escrita directamente en `config.py`, en texto plano, subida al repo.
+- Había un bug que nunca se notó: la ruta de recomendaciones intentaba pasarle 5 argumentos a una función que solo aceptaba 3 (`genre, n, min_rating`). Si alguien mandaba `start_year` o `end_year` en la URL, la app tronaba.
+- Cada vez que alguien pedía recomendaciones, se releía y reprocesaba desde cero el CSV completo de películas — nada de caché.
+- Había un test que ni siquiera podía correr porque importaba una función que no existe en el proyecto.
 
-```bash
-git clone https://github.com/yourusername/movie-recommendation-system.git
-cd movie-recommendation-system
-```
+## Qué cambié
 
-### 2. Set Up Virtual Environment
+**Blueprints separados.** Ahora hay dos: `main` (solo la vista HTML de la página principal) y `api` (todos los endpoints JSON, bajo el prefijo `/api/`). Cada uno vive en su propia carpeta dentro de `app/blueprints/`.
 
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+**Cliente de TMDB aparte.** Las llamadas a la API externa (buscar película, traer detalles, traer recomendaciones) ahora están en `app/clients/tmdb_client.py`, en vez de mezcladas con las rutas de Flask.
 
-### 3. Install Dependencies
+**Config con variables de entorno.** La API key y demás datos sensibles ya no están en el código — se leen de un archivo `.env` (que no se sube al repo, ver `.gitignore`). Usa `.env.example` como plantilla. También agregué configuraciones separadas para desarrollo, testing y producción.
 
-```bash
-pip install -r requirements.txt
-```
+**Arreglé el bug de los 5 argumentos**, quitando los parámetros de año que nunca funcionaron.
 
-### 4. Set Up the Database
+**Caché en el procesamiento de datos**, con `lru_cache`, para no reprocesar el CSV en cada request.
 
-```bash
-python scripts/database_setup.py
-```
+**Agregué `/api/health`**, un endpoint simple para monitoreo (lo voy a necesitar para el despliegue en producción más adelante).
 
-### 5. Run the Application
-
-```bash
-python run.py
-```
-
-Visit [http://localhost:5000](http://localhost:5000) in your browser to start exploring!
-
----
-
-## ✨ Features
-
-- 🎯 **Smart Recommendations**: Get personalized movie suggestions based on your favorite genres and movie names.
-- 🖥️ **Intuitive Web Interface**: A user-friendly platform for seamless interaction.
-- 📊 **Efficient Data Storage**: Utilizes an SQLite database for fast access to movie and rating data.
-- 🔗 **Developer-Friendly API**: Easily access recommendations programmatically.
-
----
-
-## 🎮 How to Use
-
-- **Choose Your Genre or Movie Name**: Enter your preferred genre or movie name through the web interface.
-- **Discover Movies**: Click "Get Recommendations" to view a curated list of suggested films.
-
----
-
-## 🛠️ API Usage
-
-Access movie recommendations via API:
-
-### Endpoint
-
-```
-GET /recommendations?genre={genre}&name={movie_name}&n={number}
-```
-
-### Parameters:
-
-- `genre`: The genre of movies you are interested in (e.g., action, comedy).
-- `name`: The name of the movie you want similar recommendations for.
-- `n`: The number of recommendations you want to receive.
-
-### Example Requests:
-
-1. **Based on Genre**:
-
-    ```bash
-    curl "http://localhost:5000/recommendations?genre=action&n=5"
-    ```
-
-2. **Based on Movie Name**:
-
-    ```bash
-    curl "http://localhost:5000/recommendations?name=Inception&n=5"
-    ```
-
----
-
-## 📚 Dataset
-
-This application uses **The Movies Dataset** from Kaggle, which provides rich metadata to enhance the accuracy of movie recommendations.
-
----
-
-## 📁 Project Structure
-
-```
-movie_recommendation_system/
-├── app/
-│   ├── models/          # Database models
-│   ├── routes/          # API routes
-│   ├── services/        # Recommendation logic
-│   └── utils/           # Utility functions
-├── config/              # Configuration files
-├── data/                # Data files
-├── scripts/             # Setup and utility scripts
-├── static/              # Static files (CSS, JS)
-├── templates/           # HTML templates
-└── tests/               # Test cases
-```
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! Here's how you can get involved:
-
-1. Fork the repository.
-2. Create a new branch for your feature or fix.
-3. Make your changes.
-4. Commit your changes.
-5. Push to your fork and submit a pull request.
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
-
----
-
-## 📬 Questions?
-
-Feel free to reach out to:
-
-**Your Name**  
-[youremail@example.com](mailto:youremail@example.com)
-
----
-
-Happy movie discovering! 🎥🍿
+**Arreglé el test roto** y dejé una prueba básica funcionando; la suite completa de pruebas la agrego en la siguiente fase del proyecto.

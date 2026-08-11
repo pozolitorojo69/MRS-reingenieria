@@ -1,11 +1,23 @@
 import unittest
-from app.services.recommendation_service import content_based_recommendations
 
-class TestRecommendations(unittest.TestCase):
-    def test_content_based_recommendations(self):
-        recommendations = content_based_recommendations(1, n=3)
-        self.assertEqual(len(recommendations), 3)
-        self.assertTrue(all(isinstance(r, Movie) for r in recommendations))
+from app import create_app
+from config.config import TestingConfig
+
+
+class TestRecommendationsRoute(unittest.TestCase):
+    def setUp(self):
+        self.app = create_app(TestingConfig)
+        self.client = self.app.test_client()
+
+    def test_health_endpoint(self):
+        response = self.client.get('/api/health')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json(), {'status': 'ok'})
+
+    def test_index_page_loads(self):
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 200)
+
 
 if __name__ == '__main__':
     unittest.main()
